@@ -1,7 +1,7 @@
 # ANTenna - Stock Calendar & Search
 
 <div align="center">
-  <img src="logo.png" alt="ANTenna Logo" width="120" />
+  <img src="logo.png" alt="ANTenna Logo" width="180" />
 
   <p><strong>개미 트레이더들을 위한 매수 신호 수신기, ANTenna</strong></p>
   <p><em>한국/미국 주식 데이터 분석 및 포트폴리오 관리 웹 애플리케이션</em></p>
