@@ -276,7 +276,9 @@ cd frontend && npm run dev
 ## 8. Demo
 
 <div align="center">
-  <video src="ANTenna.mp4" controls width="100%"></video>
+
+https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
+
   <p><i>ANTenna 시연 영상</i></p>
 </div>
 
