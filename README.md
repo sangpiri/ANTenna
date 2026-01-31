@@ -19,16 +19,17 @@
 ## 목차
 
 1. [Overview](#1-overview) - 개요
-2. [Features](#2-features) - 주요 기능
-3. [Tech Stack](#3-tech-stack) - 기술 스택
-4. [Project Structure](#4-project-structure) - 프로젝트 구조
-5. [Architecture](#5-architecture) - 아키텍처
-6. [API Endpoints](#6-api-endpoints) - API 엔드포인트
-7. [Getting Started](#7-getting-started) - 시작하기
-8. [Demo](#8-demo) - 시연 영상
-9. [Key Implementation Highlights](#9-key-implementation-highlights) - 핵심 구현 사항
-10. [Future Improvements](#10-future-improvements) - 향후 개선 사항
-11. [License](#11-license) - 라이선스
+2. [Background](#2-background) - 개발 배경
+3. [Features](#3-features) - 주요 기능
+4. [Tech Stack](#4-tech-stack) - 기술 스택
+5. [Project Structure](#5-project-structure) - 프로젝트 구조
+6. [Architecture](#6-architecture) - 아키텍처
+7. [API Endpoints](#7-api-endpoints) - API 엔드포인트
+8. [Getting Started](#8-getting-started) - 시작하기
+9. [Demo](#9-demo) - 시연 영상
+10. [Key Implementation Highlights](#10-key-implementation-highlights) - 핵심 구현 사항
+11. [Future Improvements](#11-future-improvements) - 향후 개선 사항
+12. [License](#12-license) - 라이선스
 
 ---
 
@@ -40,7 +41,38 @@
 
 ---
 
-## 2. Features
+## 2. Background
+
+기존 증권사 앱/HTS를 사용하면서 개인 투자자로서 느꼈던 불편함과 한계점이 이 프로젝트의 출발점이 되었습니다.
+
+### 기존 서비스의 한계
+
+| 문제점 | 설명 |
+|--------|------|
+| **과거 데이터 조회 불가** | 대부분의 증권사 앱에서는 과거 특정 날짜의 거래대금/상승률 상위 종목을 조회할 수 없습니다. 당일 데이터만 제공되어, 시간이 지나면 과거의 시장 흐름을 되돌아보기 어렵습니다. |
+| **조건 검색의 시간적 제약** | 사용자가 설정한 조건 검색이 당일 기준으로만 가능하여, 과거 특정 시점에 조건에 부합했던 종목들의 이후 주가 흐름을 분석(백테스팅)하기 어렵습니다. |
+| **고급 필터링 기능 부재** | 갭 상승/하락, 연속 상승, 이동평균선 배열 등 세부적인 기술적 조건을 조합한 고급 필터링 기능이 부족합니다. |
+
+### ANTenna의 해결 방안
+
+- **캘린더 기반 과거 데이터 조회**: 원하는 날짜를 선택하여 해당일의 상위 종목 데이터를 언제든지 확인
+- **과거 조건 검색 및 분석**: 빈출 종목, 눌림목, 연속 상승 등의 분석을 과거 데이터 기반으로 수행
+- **다단계 고급 필터링**: 갭 분석, 이동평균선 위치, 가격대 등 다양한 조건을 조합한 종목 스크리닝
+
+### ANTenna의 가치
+
+단기 주가는 기업의 내재가치보다 실적 발표, 뉴스, 테마 등 **이벤트가 트리거**가 되어, 시장 참여자들의 **심리적 요인**과 **수급의 흐름**에 따라 움직이는 경향이 강합니다.
+
+ANTenna는 이러한 시장의 특성을 고려하여 다음과 같은 가치를 제공합니다:
+
+| 투자 성향 | 활용 방안 |
+|----------|----------|
+| **단기 트레이더** | 거래대금 급증, 연속 상승, 갭 발생 등의 시그널을 통해 모멘텀 종목을 발굴하고 매매 타이밍을 포착 |
+| **장기 투자자** | 관심 종목의 과거 패턴 분석을 통해 적절한 매수 가격대와 진입 시점을 판단하는 참고 자료로 활용 |
+
+---
+
+## 3. Features
 
 ### 주식 데이터 조회
 - **캘린더 기반 조회**: 날짜를 선택하여 해당일의 거래대금/상승률 상위 300개 종목 조회
@@ -77,7 +109,7 @@
 
 ---
 
-## 3. Tech Stack
+## 4. Tech Stack
 
 ### Backend
 | Technology | Purpose |
@@ -100,7 +132,7 @@
 
 ---
 
-## 4. Project Structure
+## 5. Project Structure
 
 ```
 ANTenna/
@@ -145,7 +177,7 @@ ANTenna/
 
 ---
 
-## 5. Architecture
+## 6. Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -183,7 +215,7 @@ ANTenna/
 
 ---
 
-## 6. API Endpoints
+## 7. API Endpoints
 
 ### 한국주식 API (`/api/kr`)
 | Method | Endpoint | Description |
@@ -214,7 +246,7 @@ ANTenna/
 
 ---
 
-## 7. Getting Started
+## 8. Getting Started
 
 ### Prerequisites
 - Python 3.8+
@@ -273,7 +305,7 @@ cd frontend && npm run dev
 
 ---
 
-## 8. Demo
+## 9. Demo
 
 <div align="center">
 
@@ -284,7 +316,7 @@ https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
 
 ---
 
-## 9. Key Implementation Highlights
+## 10. Key Implementation Highlights
 
 ### 1. 효율적인 데이터 처리
 - Pandas를 활용한 대용량 CSV 데이터 처리
@@ -308,7 +340,7 @@ https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
 
 ---
 
-## 10. Future Improvements
+## 11. Future Improvements
 
 - [ ] 소셜 로그인 연동
 - [ ] 다크/라이트 테마 전환
@@ -316,7 +348,7 @@ https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
 
 ---
 
-## 11. License
+## 12. License
 
 All rights and intellectual property regarding this project belong exclusively to the owner of the account: [sangpiri1107@gmail.com]. Unauthorized copying, modification, or distribution is strictly prohibited.
 
