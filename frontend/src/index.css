@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Pretendard', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* 테이블 스타일 */
+@layer components {
+  .stock-table {
+    @apply w-full text-sm;
+  }
+
+  .stock-table thead {
+    @apply bg-gray-700 sticky top-0;
+  }
+
+  .stock-table th {
+    @apply px-4 py-3 text-left font-medium text-gray-300;
+  }
+
+  .stock-table th.text-right {
+    text-align: right;
+  }
+
+  .stock-table tbody tr {
+    @apply border-b border-gray-700 hover:bg-gray-700/50 cursor-pointer transition-colors;
+  }
+
+  .stock-table td {
+    @apply px-4 py-2;
+  }
+
+  /* 상승/하락 색상 */
+  .text-rise {
+    @apply text-red-500;
+  }
+
+  .text-fall {
+    @apply text-blue-500;
+  }
+
+  .bg-rise {
+    @apply bg-red-500/20;
+  }
+
+  .bg-fall {
+    @apply bg-blue-500/20;
+  }
+}
+
+/* 버튼 초기화 */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* 인풋 초기화 */
+input, select {
+  outline: none;
+}
+
+input:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}

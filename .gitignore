@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build (start.bat 실행 시 자동 생성됨)
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 대용량 데이터 파일 (상위 폴더에 위치)
+*.csv
+
+# 사용자 데이터 (IP별 저장되므로 개인정보 포함 가능)
+user_data/
+
+# 로그
+*.log
+
+# Claude Code
+.claude/
+.claude_*
+CLAUDE.md
+
+# 기타 캐시
+.cache/
+*.cache
+.temp/
+tmp/
