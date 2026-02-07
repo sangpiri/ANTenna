@@ -342,10 +342,18 @@ https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
 
 ## 11. Future Improvements
 
+### Infrastructure & Deployment
+- [ ] **PostgreSQL 데이터베이스 마이그레이션**: Docker 컨테이너 기반으로 기존 CSV 데이터를 PostgreSQL로 전환하여 성능 및 확장성 개선
+- [ ] **Oracle Cloud 프로덕션 배포**: 전체 애플리케이션 스택을 Oracle Cloud Infrastructure에 배포하고 커스텀 도메인 연동
+- [ ] **데이터 자동 수집 파이프라인**: 매일 장 마감 후 한국/미국 주식 데이터를 자동 수집하는 스케줄러 구축
+
+### Features
 - [ ] 소셜 로그인 연동
 - [ ] 다크/라이트 테마 전환
 - [ ] 펀더멘털 분석을 위한 재무제표 데이터 통합
 - [ ] 종목별 주요 뉴스 피드 연동
+
+### Advanced Analytics
 - [ ] 머신러닝 · 딥러닝 · 강화학습을 활용한 AI 퀀트 전략 시스템 구축
 
 ---
