@@ -309,9 +309,14 @@ cd frontend && npm run dev
 
 <div align="center">
   <p><i>ANTenna 시연 영상</i></p>
+  <video src="./ANTenna.mp4" controls width="600"></video>
 </div>
 
-https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
+<!-- <div align="center">
+  <p><i>ANTenna 시연 영상</i></p>
+</div>
+
+https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae -->
 
 ---
 
