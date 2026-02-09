@@ -308,9 +308,7 @@ cd frontend && npm run dev
 ## 9. Demo
 
 <div align="center">
-
-https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
-
+  <video src="https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae" controls width="600"></video>
   <p><i>ANTenna 시연 영상</i></p>
 </div>
 
