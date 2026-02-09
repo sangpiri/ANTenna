@@ -311,7 +311,7 @@ cd frontend && npm run dev
   <p><i>ANTenna 시연 영상</i></p>
 </div>
 
-https://github.com/user-attachments/assets/e1d4e55a-a5ba-4442-8f72-214e3daa87ae
+https://github.com/user-attachments/assets/1ae3fd88-e0b8-455c-9801-c9d2e2d5e3f7
 
 ---
 
