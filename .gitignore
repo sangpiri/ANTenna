@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build (start.bat 실행 시 자동 생성됨)
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# Claude Code
+.claude/
+.claude_*
+CLAUDE.md
+
+# 임시 파일
+임시.txt
+
+# 데이터 수집 스크립트 (비공개)
+backend/scripts/
+
+# 기타 캐시
+.cache/
+*.cache
+.temp/
+tmp/
+
+# 개발 메모 및 문서 (README.md 제외)
+*.md
+!README.md
+nul
+
+# SSH 키
+*.key
+*.key.pub
