@@ -64,7 +64,7 @@
 
 <div align="center">
 
-https://github.com/user-attachments/assets/0ae290c1-6aac-46ad-9da9-dbb58635f1f6
+https://github.com/user-attachments/assets/93b75060-98a9-4989-bc0a-52b2b5ec3298
 
   <p><i>ANTenna 시연 영상</i></p>
 </div>
