@@ -700,7 +700,7 @@ SMA, EMA, RSI, Bollinger Bands 등
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/1aa70a14-05dd-4b67-ab74-0f71efc97bcb" alt="AI Signal Dashboard" width="800" />
-  <p><i>AI 모델 시그널 대시보드 — 시장 국면, 앙상블 확률, 매수/매도 시그널 표시</i></p>
+  <p><i>AI 모델 시그널 대시보드 — 시장 국면, 앙상블 확률, 시그널 표시</i></p>
 </div>
 
 ### 10.2 모델 아키텍처 (5개 모델 앙상블)
