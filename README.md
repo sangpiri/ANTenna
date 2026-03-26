@@ -54,7 +54,7 @@
 | 한국 주식 일봉 | ~7,175,000건 (2011년부터 현재까지) |
 | 미국 주식 일봉 | ~15,238,000건 (2011년부터 현재까지) |
 | 시장 지표 | 23개 (지수, 금리, CPI, GDP, 실업률, 환율, 원자재, 암호화폐) |
-| 재무제표 | ~330,000건+ (분기/연간) |
+| 재무제표 | ~332,000건+ (분기/연간, 미국+한국) |
 | 실적 서프라이즈 | ~222,000건+ |
 | 종목 수 | 한국 ~2,650+ / 미국 ~6,790+ |
 
@@ -91,7 +91,7 @@ https://github.com/user-attachments/assets/93b75060-98a9-4989-bc0a-52b2b5ec3298
 - **다단계 고급 필터링** — 갭 분석, 이동평균선 위치, 가격대 등 다양한 조건을 조합한 종목 스크리닝
 - **핵심 기능에 집중한 UI** — 초보 투자자도 바로 활용할 수 있도록 핵심 분석 기능만 선별하여 직관적으로 제공
 - **규칙 기반 백테스팅** — 기술적 지표 조건을 설정하여 과거 수익률을 시뮬레이션
-- **퀀트 모델링** — ML(XGBoost) + DL(TCN) + 통계(SARIMAX) 앙상블 예측, 국면 감지 기반 리스크 관리 (개발 중)
+- **퀀트 모델링** — 5개 모델(XGBoost + TCN + SARIMAX + GJR-GARCH + Regime) 앙상블, 국면별 가중치 최적화, Walk-Forward 검증 완료 (3개월 백테스트: 수익률 +32.4%, 승률 56.8%, Sharpe 2.15)
 
 ### ANTenna의 가치
 
@@ -684,38 +684,55 @@ SMA, EMA, RSI, Bollinger Bands 등
 
 ## 10. Quant Modeling Strategy
 
-> 현재 설계 완료 단계. 기존 규칙 기반 백테스팅과 별도로 ML 모델 기반 예측 시스템을 구축 예정.
+> 5개 모델 앙상블 + 국면별 가중치 최적화 완료. Walk-Forward 검증 및 백테스팅 결과 확보.
+> 학습: RunPod RTX 4090 / 추론: Contabo VPS (CPU)
 
-### 10.1 모델 아키텍처 (5+1 모델)
+### 10.1 백테스팅 결과
+
+**3개월 Out-of-Sample (2025-10 ~ 2026-01, 64거래일):**
+
+| 전략 | 수익률 | 승률 | Sharpe | MDD | 거래 수 |
+|------|--------|------|--------|-----|---------|
+| Global 가중치 | +18.2% | 52.9% | 1.38 | -22.5% | 596건 |
+| **Per-regime (국면별 최적)** | **+32.4%** | **56.8%** | **2.15** | **-18.3%** | **308건** |
+
+> 조건: 상위 10종목, 3일 보유, 매일 리밸런싱, $10↑, 거래비용 0.1% 편도, 초기 $100,000
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/1aa70a14-05dd-4b67-ab74-0f71efc97bcb" alt="AI Signal Dashboard" width="800" />
+  <p><i>AI 모델 시그널 대시보드 — 시장 국면, 앙상블 확률, 매수/매도 시그널 표시</i></p>
+</div>
+
+### 10.2 모델 아키텍처 (5개 모델 앙상블)
 
 ```mermaid
 graph TB
     subgraph L0["Layer 0 — Regime Detection"]
         KMeans["K-Means<br/>매크로 환경 분류<br/>risk-on / risk-off / neutral"]
         MSM["MSM<br/>가격 국면 감지<br/>bull / bear / sideways"]
-        KMeans --> Combined["복합 국면<br/>→ 앙상블 가중치 결정"]
+        KMeans --> Combined["복합 국면 (9가지)<br/>→ 앙상블 가중치 결정"]
         MSM --> Combined
     end
 
     subgraph L1["Layer 1 — 예측 모델 3종"]
-        XGB["XGBoost<br/>방향 예측<br/>(피처 기반)"]
-        SARIMAX["SARIMAX<br/>수준 예측<br/>(시계열)"]
-        TCN["TCN<br/>패턴 예측<br/>(1D-CNN)"]
-        XGB --> Ensemble["가중 앙상블<br/>(국면별 가중치)"]
+        XGB["XGBoost<br/>방향 예측 (3d)<br/>109 피처"]
+        SARIMAX["SARIMAX<br/>주간 가격 예측<br/>6 외생변수"]
+        TCN["TCN<br/>패턴 예측 (1d)<br/>60일 시퀀스"]
+        XGB --> Ensemble["국면별 가중 앙상블"]
         SARIMAX --> Ensemble
         TCN --> Ensemble
     end
 
     subgraph L2["Layer 2 — 리스크 관리"]
-        GARCH["GJR-GARCH<br/>변동성 → 상한선"]
-        Kelly["Kelly Criterion<br/>승률 → 배팅 비율"]
+        GARCH["GJR-GARCH<br/>변동성 → 포지션 상한"]
+        Kelly["Half Kelly<br/>승률 → 배팅 크기"]
         GARCH --> Final["최종 포지션<br/>min(Kelly, GARCH)"]
         Kelly --> Final
     end
 
     Combined -->|"국면별 가중치"| Ensemble
-    Ensemble -->|"예측 신호"| L2
-    Final --> Output["백테스팅 / 실전 신호"]
+    Ensemble -->|"앙상블 확률"| L2
+    Final --> Output["매수/매도 시그널<br/>+ 포지션 크기"]
 
     style L0 fill:#FFE0B2,color:#000
     style L1 fill:#C8E6C9,color:#000
@@ -723,18 +740,43 @@ graph TB
     style Output fill:#E1BEE7,color:#000
 ```
 
-### 10.2 피처 설계 (3계층)
+| 모델 | 역할 | 타겟 | 입력 |
+|------|------|------|------|
+| **XGBoost** | 종목별 방향 예측 | 3일 후 상승 확률 | 109개 피처 (Level 0~8) |
+| **TCN** | 시퀀스 패턴 예측 | 1일 후 상승 확률 | 21개 피처 → PCA 17개, 60일 윈도우 |
+| **SARIMAX** | 주간 가격 추세 | 다음 주 예측가 | 6개 외생변수 (VIF+PFI 선별) |
+| **GJR-GARCH** | 변동성 예측 | 포지션 스케일 | target_vol 15% / predicted_vol |
+| **Regime** | 시장 국면 감지 | 앙상블 가중치 | K-Means(매크로 6개) × MSM(주간 수익률) |
 
-| 계층 | 피처 | 주기 |
-|------|------|------|
-| **Layer 1** — 기술적 | 수익률, 변동성, RSI, MA괴리율, 거래량변화율 | 일별 |
-| **Layer 2** — 펀더멘털 | ROA, ROE, 매출성장률, 부채비율, FCF | 분기별 → forward-fill |
-| **Layer 3** — 매크로 | 10Y금리, CPI, 달러인덱스, 유가, 비트코인 | 일별/월별 |
+### 10.3 피처 설계 (109개)
 
-### 10.3 향후 확장
+| 계층 | 피처 수 | 내용 |
+|------|---------|------|
+| **Level 0** — 현재 상태 | 13개 | return, volatility, rsi, bb, ma, volume, market_cap |
+| **Level 1** — 추세 변화 | 10개 | rsi/volume/volatility/bb/ma 변화율 |
+| **Level 2** — 가격 구조 | 11개 | drawdown, recovery, consecutive, atr, gap |
+| **Level 3** — 모멘텀 | 14개 | return_accel, macd, ma_alignment, roc, stochastic |
+| **Level 4** — 거래량-가격 | 5개 | vol_price_corr, obv, volume_spike |
+| **Level 5** — 시장 대비 | 5개 | alpha, beta, correlation_sp500 |
+| **Level 6** — 돌파 감지 | 8개 | dist_52w, new_high, resistance, bb_squeeze |
+| **Level 7** — 밸류에이션 | 4개 | earnings/book/revenue/ocf yield |
+| **Level 8** — 통계 | 5개 | skew, kurtosis, autocorr, amihud, turnover |
+| **갭 파생** | 4개 | gap_volume_combo, gap_fill, large_gap, overnight_return |
+| **재무(Fund)** | 20개 | 분기(Q) 10개 + 연간(FY) 10개 |
+| **매크로(Macro)** | 8개 | 금리, CPI, 달러, 유가, 금, 비트코인, VIX, 금리차 |
+| **서프라이즈** | 2개 | eps_surprise, revenue_surprise |
 
-- **EfficientNet-B0** — 캔들차트 이미지를 2D CNN으로 시각적 패턴 인식 (6번째 모델)
-- **NLP 감성 분석** — GDELT 뉴스 + Reddit/StockTwits + FinBERT로 감성 피처 생성
+### 10.4 학습 방식
+
+- **Walk-Forward 검증** — 46개 윈도우, Train 3년 / Val 6개월 / Test 3개월 슬라이딩
+- **데이터**: 14M행 × 109 피처 (2011~현재, 미국 ~6,000종목)
+- **학습 환경**: RunPod RTX 4090 / **추론 환경**: Contabo VPS CPU
+- **국면별 가중치 최적화**: 77개 후보 그리드서치, 국면별 XGB/SAR/TCN 비율 자동 결정
+
+### 10.5 향후 확장
+
+- **지수 방향 예측 모델** — S&P 500/NASDAQ 내일 방향 예측 (LightGBM + Breadth 피처), Regime 보강판으로 활용
+- **NLP 감성 분석** — 뉴스/소셜 미디어 + FinBERT로 감성 피처 생성
 - **RAG** — 과거 유사 이벤트 검색 + 예측 근거 설명 생성
 
 ---
@@ -748,13 +790,14 @@ ANTenna/
 │   ├── config.py                  # 환경설정 (DB, JWT, OAuth 등)
 │   ├── celery_app.py              # Celery 설정 (RabbitMQ + Redis)
 │   ├── Dockerfile                 # Python 3.11 컨테이너
-│   ├── requirements.txt           # 25+ Python 의존성
+│   ├── requirements.txt           # Python 의존성
 │   │
 │   ├── routers/                   # API 엔드포인트
 │   │   ├── kr_stock.py            #   한국 주식 API
 │   │   ├── us_stock.py            #   미국 주식 API
 │   │   ├── market_indices.py      #   시장 지표 API
 │   │   ├── backtest.py            #   백테스팅 API
+│   │   ├── quant.py               #   퀀트 시그널 API
 │   │   ├── auth.py                #   Google OAuth API
 │   │   ├── admin.py               #   관리자 API
 │   │   └── user.py                #   사용자 데이터 API
@@ -764,46 +807,84 @@ ANTenna/
 │   │   ├── user_manager.py        #   사용자 데이터 관리
 │   │   └── auth_service.py        #   OAuth + JWT
 │   │
-│   ├── backtester/                # 백테스팅 엔진 (자체 구현)
+│   ├── models/
+│   │   └── schemas.py             # Pydantic 데이터 스키마
+│   │
+│   ├── middleware/
+│   │   └── auth_middleware.py      # 인증 미들웨어
+│   │
+│   ├── backtester/                # 규칙 기반 백테스팅 엔진
 │   │   ├── engine.py              #   코어 백테스트 루프
 │   │   ├── condition_parser.py    #   조건 JSON → pandas mask
 │   │   ├── indicators.py          #   기술적 지표 (SMA, RSI, MACD 등)
 │   │   ├── portfolio.py           #   포지션/손익 추적
+│   │   ├── execution.py           #   주문 체결 시뮬레이션
 │   │   ├── metrics.py             #   성과 지표 (Sharpe, MDD 등)
 │   │   ├── walk_forward.py        #   Walk-Forward 분석
 │   │   ├── monte_carlo.py         #   Monte Carlo 시뮬레이션
 │   │   ├── screening_engine.py    #   스크리닝 기반 백테스트
-│   │   └── presets.py             #   5가지 프리셋 전략
+│   │   ├── operators.py           #   비교 연산자
+│   │   └── presets.py             #   프리셋 전략
 │   │
-│   ├── scripts/                   # 데이터 수집 스크립트 (18개)
+│   ├── quant/                     # 퀀트 모델링 (gitignore)
+│   │   ├── config.py              #   가중치, 필터, 하이퍼파라미터 설정
+│   │   ├── data/
+│   │   │   ├── loader.py          #   DB → DataFrame (TimescaleDB)
+│   │   │   └── features.py        #   109개 피처 엔지니어링
+│   │   ├── models/
+│   │   │   ├── base.py            #   공통 인터페이스 (train/predict/save/load)
+│   │   │   ├── xgboost_model.py   #   방향 예측
+│   │   │   ├── tcn_model.py       #   시퀀스 패턴 예측 
+│   │   │   ├── sarimax_model.py   #   주간 가격 추세 예측
+│   │   │   ├── gjr_garch_model.py #   변동성 → 포지션 사이징
+│   │   │   └── regime_model.py    #   시장 국면 감지 (KMeans+MSM)
+│   │   ├── pipeline/
+│   │   │   ├── trainer.py         #   Walk-Forward 학습 + 앙상블 추론
+│   │   │   ├── combiner.py        #   국면별 가중 앙상블
+│   │   │   └── backtester.py      #   퀀트 전용 백테스팅
+│   │   └── ensemble/
+│   │
+│   ├── scripts/                   # 데이터 수집 스크립트 (21개)
+│   │
 │   ├── sql/
-│   │   └── init.sql               # DB 초기화 (hypertable, 인덱스)
+│   │   ├── init.sql               # DB 초기화 (hypertable, 인덱스)
+│   │   └── add_market_indices.sql  # 시장 지표 테이블 추가
 │   │
 │   └── tasks/
 │       └── backtest.py            # Celery 비동기 태스크
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── main.tsx               # React 진입점
 │   │   ├── App.tsx                # 메인 레이아웃
+│   │   ├── index.css              # 글로벌 스타일
 │   │   ├── components/
-│   │   │   ├── home/              #   홈페이지 (지수카드, 매크로카드)
-│   │   │   ├── kr/                #   한국 주식 뷰
-│   │   │   ├── us/                #   미국 주식 뷰
-│   │   │   ├── backtest/          #   백테스팅 UI
+│   │   │   ├── home/              #   홈페이지 (지수카드, 매크로카드, 차트모달)
+│   │   │   ├── kr/                #   한국 주식 뷰 
+│   │   │   ├── us/                #   미국 주식 뷰 
+│   │   │   ├── backtest/          #   백테스팅 UI (조건설정, 결과패널)
+│   │   │   ├── quant/             #   퀀트 시그널 뷰
 │   │   │   └── common/            #   공용 (차트, 재무제표, 테이블, 검색, 즐겨찾기 등)
 │   │   ├── hooks/                 #   useAuth, useFavorites, useStockData
 │   │   ├── services/api.ts        #   Axios API 클라이언트
-│   │   └── types/stock.ts         #   50+ TypeScript 인터페이스
-│   ├── dist/                      # 빌드 결과물 (nginx가 직접 서빙)
+│   │   └── types/stock.ts         #   TypeScript 인터페이스
+│   ├── dist/                      # 빌드 결과물 (nginx가 직접 서빙, gitignore)
 │   └── package.json               # React 19, TanStack Query 등
+│
+├── model_store/                   # 학습된 모델 파일 (gitignore)
+│   └── us_final/                  #   배포용 모델 (~100MB)
+│       ├── xgboost.pkl            #     XGBoost V2 (109 피처)
+│       ├── tcn.pt                 #     TCN (PyTorch)
+│       ├── sarimax.pkl            #     SARIMAX (955종목)
+│       ├── gjr_garch.pkl          #     GJR-GARCH (5,349종목)
+│       └── regime.pkl             #     Regime (KMeans+MSM)
 │
 ├── nginx/
 │   └── nginx.conf                 # 리버스 프록시 + SSL + SPA 라우팅
 │
 ├── certbot/                       # Let's Encrypt SSL 인증서
 ├── docker-compose.yml             # 6개 서비스 정의
-├── .env.example                   # 환경변수 템플릿
-└── .github/workflows/             # GitHub Actions CI/CD
+└── .env.example                   # 환경변수 템플릿
 ```
 
 ---
@@ -863,6 +944,13 @@ ANTenna/
 | POST | `/screening` | 스크리닝 기반 백테스트 실행 |
 | GET | `/{task_id}` | 백테스트 결과 조회 |
 | GET | `/presets` | 프리셋 전략 목록 |
+
+### 퀀트 시그널 API (`/api/quant`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/signals` | 최신 앙상블 시그널 (매수/매도/보유) |
+| GET | `/regime` | 현재 시장 국면 (macro × price) |
 
 ### 관리자 API (`/api/admin`)
 
